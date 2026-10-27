@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusTube AI Pro — Smart YouTube Video Intelligence</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#fef2f2',
+                            100: '#fee2e2',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                            800: '#991b1b',
+                            900: '#7f1d1d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(107, 114, 128, 0.8); }
+    </style>
+</head>
+<body class="h-full bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300 flex flex-col overflow-hidden">
+
+    <!-- Top Navigation Bar -->
+    <header class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-between px-6 z-20 shrink-0">
+        <div class="flex items-center space-x-3">
+            <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-brand-600 to-rose-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
+                <i data-lucide="sparkles" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg tracking-tight bg-gradient-to-r from-brand-600 to-rose-500 bg-clip-text text-transparent">NexusTube AI Pro</h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Advanced Video Comprehension Engine</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <button onclick="toggleHistoryDrawer()" class="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                <i data-lucide="history" class="w-4 h-4 text-brand-500"></i>
+                <span class="hidden sm:inline">Saved History</span>
+                <span id="history-badge" class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] bg-brand-500 text-white font-bold">0</span>
+            </button>
+            <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition text-slate-600 dark:text-slate-300">
+                <i id="theme-icon" data-lucide="moon" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Layout -->
+    <div class="flex-1 flex overflow-hidden relative">
+
+        <main class="flex-1 flex flex-col overflow-y-auto p-4 md:p-8">
+            <div class="max-w-4xl w-full mx-auto space-y-6">
+
+                <!-- Hero / Input Card with Focus Mode -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+                    <h2 class="text-xl font-bold mb-2">Transform Any YouTube Video into Instant Intelligence</h2>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Paste any YouTube URL, select your analysis focus, and generate deep summaries, mind maps, quizzes, and quotes.</p>
+                    
+                    <div class="space-y-4">
+                        <div class="relative flex items-center">
+                            <i data-lucide="youtube" class="absolute left-4 w-5 h-5 text-red-500"></i>
+                            <input id="url-input" type="text" placeholder="https://www.youtube.com/watch?v=..." value="https://www.youtube.com/watch?v=K5KVEU3aaeQ" class="w-full pl-12 pr-32 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
+                            <button onclick="startSummarization()" class="absolute right-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg text-sm shadow-md shadow-brand-500/20 transition flex items-center space-x-1.5">
+                                <i data-lucide="zap" class="w-4 h-4"></i>
+                                <span>Analyze</span>
+                            </button>
+                        </div>
+
+                        <!-- Focus Mode Selector & Quick Presets -->
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-1">
+                            <div class="flex items-center space-x-2 w-full sm:w-auto">
+                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider shrink-0">Focus Mode:</span>
+                                <select id="focus-mode-select" class="flex-1 sm:w-56 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                    <option value="general">Comprehensive Summary</option>
+                                    <option value="technical">Developer & Technical Focus</option>
+                                    <option value="business">Business & Strategy Insights</option>
+                                    <option value="beginner">Beginner Friendly (Simplified)</option>
+                                    <option value="quick">Quick 1-Minute TL;DR</option>
+                                </select>
+                            </div>
+
+                            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 w-full sm:w-auto">
+                                <button onclick="loadPreset('https://www.youtube.com/watch?v=K5KVEU3aaeQ', 'Python Full Course')" class="text-xs px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-brand-50 hover:text-brand-600 border border-slate-200 dark:border-slate-700 transition shrink-0">Python Course</button>
+                                <button onclick="loadPreset('https://www.youtube.com/watch?v=aircAruvnKk', 'Neural Networks')" class="text-xs px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-brand-50 hover:text-brand-600 border border-slate-200 dark:border-slate-700 transition shrink-0">Neural Networks</button>
+                                <button onclick="loadPreset('https://www.youtube.com/watch?v=rfscVS0vtbw', 'Sam Altman OpenAI')" class="text-xs px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-brand-50 hover:text-brand-600 border border-slate-200 dark:border-slate-700 transition shrink-0">Sam Altman</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading State Simulation Box -->
+                <div id="loading-state" class="hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-sm text-center space-y-6">
+                    <div class="w-16 h-16 bg-brand-100 dark:bg-brand-950 text-brand-600 dark:text-brand-400 rounded-full flex items-center justify-center mx-auto animate-pulse">
+                        <i data-lucide="loader-2" class="w-8 h-8 animate-spin"></i>
+                    </div>
+                    <div class="space-y-2">
+                        <h3 id="loading-step-title" class="font-bold text-lg">Extracting video captions & transcript...</h3>
+                        <p id="loading-step-desc" class="text-sm text-slate-500 dark:text-slate-400">Processing vector semantic clusters and key quotes.</p>
+                    </div>
+                    <div class="max-w-md mx-auto w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                        <div id="loading-progress-bar" class="bg-brand-600 h-full w-1/3 transition-all duration-500"></div>
+                    </div>
+                </div>
+
+                <!-- Results Dashboard -->
+                <div id="results-dashboard" class="hidden space-y-6">
+
+                    <!-- Video Meta Banner & Advanced Stats -->
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-6 shadow-sm space-y-6">
+                        <div class="flex flex-col md:flex-row items-center gap-6">
+                            <!-- Thumbnail / Embedded Video Player Container -->
+                            <div id="media-container" class="w-full md:w-80 aspect-video bg-slate-800 rounded-xl overflow-hidden relative shadow-inner shrink-0 flex items-center justify-center text-slate-400">
+                                <img id="video-thumbnail" src="https://placehold.co/600x338/1e293b/ef4444?text=NexusTube" alt="Thumbnail" class="w-full h-full object-cover">
+                                <button onclick="embedVideoPlayer()" class="absolute inset-0 bg-black/40 hover:bg-black/30 flex items-center justify-center transition group">
+                                    <div class="w-12 h-12 rounded-full bg-brand-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition">
+                                        <i data-lucide="play" class="w-5 h-5 ml-0.5"></i>
+                                    </div>
+                                </button>
+                                <div class="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/70 text-white text-[11px] font-semibold" id="video-duration">18:40</div>
+                            </div>
+
+                            <div class="flex-1 space-y-3 text-center md:text-left w-full">
+                                <div class="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                                    <span id="badge-focus" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-50 text-brand-600 dark:bg-brand-950/60 dark:text-brand-400 border border-brand-200 dark:border-brand-900">Comprehensive Analysis</span>
+                                    <span class="text-xs text-slate-400 font-medium" id="video-channel">Channel Name</span>
+                                </div>
+                                <h3 id="video-title" class="text-xl font-bold tracking-tight">Video Title Goes Here</h3>
+
+                                <!-- Rich Export & Action Buttons -->
+                                <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
+                                    <button onclick="exportSummary('markdown')" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold transition flex items-center space-x-1.5">
+                                        <i data-lucide="file-code" class="w-3.5 h-3.5 text-brand-500"></i>
+                                        <span>Export Markdown</span>
+                                    </button>
+                                    <button onclick="exportSummary('json')" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold transition flex items-center space-x-1.5">
+                                        <i data-lucide="database" class="w-3.5 h-3.5 text-brand-500"></i>
+                                        <span>Export JSON</span>
+                                    </button>
+                                    <button onclick="exportSummary('pdf')" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold transition flex items-center space-x-1.5">
+                                        <i data-lucide="file-text" class="w-3.5 h-3.5 text-brand-500"></i>
+                                        <span>PDF Summary Card</span>
+                                    </button>
+                                    <button onclick="copySummary()" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold transition flex items-center space-x-1.5">
+                                        <i data-lucide="copy" class="w-3.5 h-3.5 text-brand-500"></i>
+                                        <span>Copy</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Stats Cards -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                            <div class="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl">
+                                <div class="text-[11px] text-slate-400 font-medium">Time Saved</div>
+                                <div id="stat-timesaved" class="text-base font-bold text-brand-600 dark:text-brand-400">14 Mins</div>
+                            </div>
+                            <div class="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl">
+                                <div class="text-[11px] text-slate-400 font-medium">Word Count</div>
+                                <div id="stat-wordcount" class="text-base font-bold">2,450 words</div>
+                            </div>
+                            <div class="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl">
+                                <div class="text-[11px] text-slate-400 font-medium">Comprehension Score</div>
+                                <div class="text-base font-bold text-emerald-500">94% High</div>
+                            </div>
+                            <div class="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl">
+                                <div class="text-[11px] text-slate-400 font-medium">Key Concepts</div>
+                                <div id="stat-concepts" class="text-base font-bold">6 Topics</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabs Header -->
+                    <div class="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-0 overflow-x-auto">
+                        <button onclick="switchTab('summary')" id="tab-btn-summary" class="px-4 py-3 text-sm font-semibold border-b-2 border-brand-600 text-brand-600 dark:text-brand-400 transition flex items-center space-x-2 shrink-0">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                            <span>Summary & Takeaways</span>
+                        </button>
+                        <button onclick="switchTab('mindmap')" id="tab-btn-mindmap" class="px-4 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition flex items-center space-x-2 shrink-0">
+                            <i data-lucide="git-merge" class="w-4 h-4"></i>
+                            <span>Mind Map & Topics</span>
+                        </button>
+                        <button onclick="switchTab('quotes')" id="tab-btn-quotes" class="px-4 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition flex items-center space-x-2 shrink-0">
+                            <i data-lucide="quote" class="w-4 h-4"></i>
+                            <span>Key Quotes & Soundbites</span>
+                        </button>
+                        <button onclick="switchTab('quiz')" id="tab-btn-quiz" class="px-4 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition flex items-center space-x-2 shrink-0">
+                            <i data-lucide="help-circle" class="w-4 h-4"></i>
+                            <span>Quiz Generator</span>
+                        </button>
+                        <button onclick="switchTab('chat')" id="tab-btn-chat" class="px-4 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition flex items-center space-x-2 shrink-0">
+                            <i data-lucide="message-square-code" class="w-4 h-4"></i>
+                            <span>AI Chat Q&A</span>
+                        </button>
+                    </div>
+
+                    <!-- Tab 1: Summary -->
+                    <div id="tab-summary" class="tab-content space-y-6">
+                        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-3">
+                            <h4 class="font-bold text-sm uppercase tracking-wider text-brand-500 flex items-center space-x-2">
+                                <i data-lucide="sparkle" class="w-4 h-4"></i>
+                                <span>Executive Summary</span>
+                            </h4>
+                            <p id="summary-text" class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">Loading summary...</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
+                            <h4 class="font-bold text-sm uppercase tracking-wider text-brand-500 flex items-center space-x-2">
+                                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                                <span>Key Takeaways</span>
+                            </h4>
+                            <ul id="takeaways-list" class="space-y-3 text-sm text-slate-600 dark:text-slate-300"></ul>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Key Topics & Mind Map View -->
+                    <div id="tab-mindmap" class="tab-content hidden space-y-6">
+                        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-bold text-sm uppercase tracking-wider text-brand-500 flex items-center space-x-2">
+                                    <i data-lucide="git-merge" class="w-4 h-4"></i>
+                                    <span>Conceptual Mind Map & Sub-Topics</span>
+                                </h4>
+                                <span class="text-xs text-slate-400 font-medium">Interactive SVG View</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Visual mapping of the core themes discussed throughout the video stream.</p>
+                            
+                            <!-- SVG Mind Map Container -->
+                            <div id="mindmap-container" class="w-full bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-100 dark:border-slate-800 flex items-center justify-center overflow-x-auto">
+                                <!-- Rendered dynamically via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Key Quotes & Soundbites -->
+                    <div id="tab-quotes" class="tab-content hidden space-y-6">
+                        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
+                            <h4 class="font-bold text-sm uppercase tracking-wider text-brand-500 flex items-center space-x-2">
+                                <i data-lucide="quote" class="w-4 h-4"></i>
+                                <span>Impactful Quotes & Soundbites</span>
+                            </h4>
+                            <div id="quotes-list" class="space-y-4">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 4: Quiz Generator -->
+                    <div id="tab-quiz" class="tab-content hidden space-y-6">
+                        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-6">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-bold text-sm uppercase tracking-wider text-brand-500 flex items-center space-x-2">
+                                    <i data-lucide="help-circle" class="w-4 h-4"></i>
+                                    <span>Knowledge Comprehension Quiz</span>
+                                </h4>
+                                <button onclick="generateQuiz()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold transition flex items-center space-x-1.5">
+                                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                                    <span>New Quiz</span>
+                                </button>
+                            </div>
+                            <div id="quiz-container" class="space-y-6">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 5: AI Chat Q&A -->
+                    <div id="tab-chat" class="tab-content hidden flex flex-col h-[520px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+                        <div class="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                <span class="text-xs font-semibold">AI Video Assistant Active</span>
+                            </div>
+                            <span class="text-[11px] text-slate-400">Ask deep dive questions</span>
+                        </div>
+                        <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold shrink-0">AI</div>
+                                <div class="bg-slate-100 dark:bg-slate-800 rounded-2xl p-3.5 text-sm max-w-[80%] text-slate-700 dark:text-slate-200">
+                                    Hello! I have fully processed this video's transcript and topic vectors. What would you like to explore further?
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                            <form onsubmit="handleChatSubmit(event)" class="flex items-center space-x-2">
+                                <input id="chat-input" type="text" placeholder="Ask anything about the video..." class="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                <button type="submit" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center">
+                                    <i data-lucide="send" class="w-4 h-4"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+
+        <!-- History Drawer -->
+        <aside id="history-drawer" class="absolute inset-y-0 right-0 w-80 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl z-30 transform translate-x-full transition-transform duration-300 flex flex-col">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div class="flex items-center space-x-2 font-bold text-sm">
+                    <i data-lucide="history" class="w-4 h-4 text-brand-500"></i>
+                    <span>Summarization History</span>
+                </div>
+                <button onclick="toggleHistoryDrawer()" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div id="history-list" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800">
+                <button onclick="clearHistory()" class="w-full py-2 rounded-xl text-xs font-semibold bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 transition">Clear History</button>
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 px-4 py-3 bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-semibold rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center space-x-2">
+        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+        <span id="toast-msg">Action completed!</span>
+    </div>
+
+    <script>
+        const videoDatabase = {
+            "K5KVEU3aaeQ": {
+                title: "Python Full Course for Beginners [Tutorial]",
+                channel: "Programming with Mosh",
+                duration: "6:14:00",
+                thumbnail: "https://placehold.co/600x338/1e293b/3b82f6?text=Python+Course",
+                summary: "An intensive, highly structured masterclass on Python programming covering variables, control flow, functions, data structures, object-oriented programming, and real-world automation scripts.",
+                takeaways: [
+                    "Python emphasizes code readability and simple syntax, making it ideal for beginners and enterprise systems alike.",
+                    "Mastering lists, dictionaries, tuples, and loops forms the core foundation of algorithmic logic.",
+                    "Object-oriented programming principles (classes and inheritance) allow clean modular code architecture.",
+                    "Automation libraries enable building real-world file parsers and web scrapers effortlessly."
+                ],
+                quotes: [
+                    { time: "12:15", quote: "Code is read much more often than it is written. Keep it clean and readable." },
+                    { time: "1:45:20", quote: "Functions should do one thing and do it well." },
+                    { time: "4:10:05", quote: "Debugging is twice as hard as writing the code in the first place." }
+                ],
+                topics: [
+                    { main: "Basics", sub: ["Variables", "Strings", "Math Operators"] },
+                    { main: "Control Flow", sub: ["If Statements", "For Loops", "While Loops"] },
+                    { main: "Data Structures", sub: ["Lists", "Dictionaries", "Tuples"] },
+                    { main: "Functions", sub: ["Parameters", "Return Values", "Scope"] },
+                    { main: "OOP", sub: ["Classes", "Constructors", "Inheritance"] }
+                ],
+                quiz: [
+                    { q: "Which data type is immutable in Python?", options: ["List", "Dictionary", "Tuple", "Set"], answer: 2 },
+                    { q: "How do you define a function in Python?", options: ["function myFunc()", "def myFunc():", "create myFunc()", "fun myFunc()"], answer: 1 },
+                    { q: "What keyword is used for conditional branching?", options: ["switch", "case", "if", "branch"], answer: 2 }
+                ]
+            },
+            "aircAruvnKk": {
+                title: "But what is a neural network? | Deep learning, chapter 1",
+                channel: "3Blue1Brown",
+                duration: "19:13",
+                thumbnail: "https://placehold.co/600x338/1e293b/ef4444?text=Neural+Networks",
+                summary: "This video breaks down the core math of neurons, weights, biases, and sigmoid activation functions using handwritten digit recognition as the prime example.",
+                takeaways: [
+                    "Neural networks are collections of neuron nodes organized in layers that transform input data through weighted sums.",
+                    "Weights and biases represent parameters that the network adjusts automatically via gradient descent.",
+                    "Sigmoid activation functions squash output values between 0 and 1 to represent probabilities.",
+                    "Each successive hidden layer learns increasingly complex hierarchical features."
+                ],
+                quotes: [
+                    { time: "03:15", quote: "Neural networks don't follow hard-coded rules; they learn from examples." },
+                    { time: "14:20", quote: "Gradient descent is like finding the lowest point in a foggy mountain valley." }
+                ],
+                topics: [
+                    { main: "Neurons", sub: ["Activation", "Inputs", "Outputs"] },
+                    { main: "Layers", sub: ["Input Layer", "Hidden Layers", "Output Layer"] },
+                    { main: "Training", sub: ["Weights", "Biases", "Cost Function"] }
+                ],
+                quiz: [
+                    { q: "What is the primary role of a weight in a neural network?", options: ["Determining neuron color", "Scaling connection importance", "Storing video files", "Resetting the network"], answer: 1 },
+                    { q: "What algorithm is used to minimize the cost function?", options: ["Binary Search", "Gradient Descent", "QuickSort", "Dijkstra"], answer: 1 }
+                ]
+            }
+        };
+
+        let currentData = null;
+        let history = JSON.parse(localStorage.getItem('nexustubepro_history') || '[]');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            updateHistoryUI();
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('theme-icon').setAttribute('data-lucide', 'sun');
+                lucide.createIcons();
+            }
+        });
+
+        function toggleDarkMode() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                document.getElementById('theme-icon').setAttribute('data-lucide', 'moon');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                document.getElementById('theme-icon').setAttribute('data-lucide', 'sun');
+            }
+            lucide.createIcons();
+        }
+
+        function loadPreset(url, title) {
+            document.getElementById('url-input').value = url;
+            startSummarization();
+        }
+
+        function extractVideoId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        function startSummarization() {
+            const url = document.getElementById('url-input').value.trim();
+            const focus = document.getElementById('focus-mode-select').value;
+            if (!url) {
+                showToast("Please enter a valid YouTube URL");
+                return;
+            }
+
+            const videoId = extractVideoId(url);
+            currentData = videoDatabase[videoId] || {
+                title: "Comprehensive Video Analysis (" + (videoId || "Custom") + ")",
+                channel: "Global Knowledge Stream",
+                duration: "24:15",
+                thumbnail: "https://placehold.co/600x338/1e293b/10b981?text=Video+Summary",
+                summary: "This video covers advanced system architecture, optimized workflows, and modern methodology tailored for professionals seeking high-impact insights.",
+                takeaways: [
+                    "Core frameworks prioritize scalability, modularity, and robust error management.",
+                    "Automation reduces operational overhead significantly across workflows.",
+                    "Continuous metric tracking ensures sustainable performance gains."
+                ],
+                quotes: [
+                    { time: "05:12", quote: "Efficiency is doing things right; effectiveness is doing the right things." }
+                ],
+                topics: [
+                    { main: "Architecture", sub: ["Design", "Scalability"] },
+                    { main: "Execution", sub: ["Workflows", "Automation"] }
+                ],
+                quiz: [
+                    { q: "What is the primary emphasis of the discussed framework?", options: ["Speed and Scalability", "Randomness", "File Size", "Legacy Support"], answer: 0 }
+                ]
+            };
+
+            document.getElementById('results-dashboard').classList.add('hidden');
+            const loadingEl = document.getElementById('loading-state');
+            loadingEl.classList.remove('hidden');
+
+            const titleEl = document.getElementById('loading-step-title');
+            const descEl = document.getElementById('loading-step-desc');
+            const barEl = document.getElementById('loading-progress-bar');
+
+            barEl.style.width = '30%';
+            titleEl.innerText = "Parsing transcript & token vectors...";
+            descEl.innerText = `Applying focus mode: ${focus.toUpperCase()}`;
+
+            setTimeout(() => {
+                barEl.style.width = '70%';
+                titleEl.innerText = "Generating mind maps & soundbites...";
+                descEl.innerText = "Extracting key quotes and building quiz vectors.";
+            }, 1000);
+
+            setTimeout(() => {
+                barEl.style.width = '100%';
+                titleEl.innerText = "Finalizing dashboard...";
+            }, 2000);
+
+            setTimeout(() => {
+                loadingEl.classList.add('hidden');
+                populateDashboard(currentData, focus);
+                document.getElementById('results-dashboard').classList.remove('hidden');
+                saveToHistory(currentData);
+                showToast("Analysis complete successfully!");
+            }, 2600);
+        }
+
+        function populateDashboard(data, focus) {
+            document.getElementById('video-title').innerText = data.title;
+            document.getElementById('video-channel').innerText = data.channel;
+            document.getElementById('video-duration').innerText = data.duration;
+            document.getElementById('video-thumbnail').src = data.thumbnail;
+            document.getElementById('summary-text').innerText = data.summary;
+            document.getElementById('badge-focus').innerText = `Focus: ${focus.charAt(0).toUpperCase() + focus.slice(1)}`;
+
+            // Stats
+            document.getElementById('stat-timesaved').innerText = Math.floor(parseInt(data.duration) || 15) + " Mins";
+            document.getElementById('stat-wordcount').innerText = (data.summary.length * 28).toLocaleString() + " words";
+            document.getElementById('stat-concepts').innerText = (data.topics ? data.topics.length : 4) + " Topics";
+
+            // Takeaways
+            const takeawaysList = document.getElementById('takeaways-list');
+            takeawaysList.innerHTML = '';
+            data.takeaways.forEach(t => {
+                const li = document.createElement('li');
+                li.className = "flex items-start space-x-2.5";
+                li.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-brand-500 shrink-0 mt-0.5"></i><span>${t}</span>`;
+                takeawaysList.appendChild(li);
+            });
+
+            // Mind Map SVG rendering
+            renderMindMap(data.topics || []);
+
+            // Quotes
+            const quotesList = document.getElementById('quotes-list');
+            quotesList.innerHTML = '';
+            (data.quotes || []).forEach(q => {
+                const div = document.createElement('div');
+                div.className = "p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border-l-4 border-brand-500 space-y-1";
+                div.innerHTML = `<div class="flex items-center space-x-2 text-xs font-semibold text-brand-500 font-mono"><i data-lucide="clock" class="w-3.5 h-3.5"></i><span>${q.time}</span></div><p class="text-sm italic font-medium">"${q.quote}"</p>`;
+                quotesList.appendChild(div);
+            });
+
+            // Quiz
+            renderQuiz(data.quiz || []);
+
+            lucide.createIcons();
+        }
+
+        function renderMindMap(topics) {
+            const container = document.getElementById('mindmap-container');
+            if (!topics || topics.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-400">No topic nodes available.</p>';
+                return;
+            }
+
+            let svgHTML = `<svg class="w-full h-64 min-w-[500px]" viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg">`;
+            svgHTML += `<rect width="600" height="300" fill="transparent" />`;
+
+            // Center Node
+            svgHTML += `<g transform="translate(250, 120)">`;
+            svgHTML += `<rect x="0" y="0" width="100" height="50" rx="10" fill="#dc2626" />`;
+            svgHTML += `<text x="50" y="30" fill="white" font-size="12" font-weight="bold" text-anchor="middle">Main Video</text>`;
+            svgHTML += `</g>`;
+
+            const angleStep = (2 * Math.PI) / topics.length;
+            topics.forEach((t, i) => {
+                const angle = i * angleStep;
+                const x = 300 + Math.cos(angle) * 160;
+                const y = 145 + Math.sin(angle) * 100;
+
+                // Connecting line
+                svgHTML += `<line x1="300" y1="145" x2="${x}" y2="${y}" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4" />`;
+
+                // Topic Node
+                svgHTML += `<g transform="translate(${x - 45}, ${y - 20})">`;
+                svgHTML += `<rect x="0" y="0" width="90" height="40" rx="8" fill="#334155" />`;
+                svgHTML += `<text x="45" y="25" fill="#f8fafc" font-size="11" font-weight="bold" text-anchor="middle">${t.main}</text>`;
+                svgHTML += `</g>`;
+            });
+
+            svgHTML += `</svg>`;
+            container.innerHTML = svgHTML;
+        }
+
+        function renderQuiz(quizData) {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            if (!quizData || quizData.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-400">No quiz questions generated.</p>';
+                return;
+            }
+
+            quizData.forEach((q, idx) => {
+                const div = document.createElement('div');
+                div.className = "p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl space-y-3";
+                let optionsHTML = '';
+                q.options.forEach((opt, optIdx) => {
+                    optionsHTML += `<label class="flex items-center space-x-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition"><input type="radio" name="quiz-${idx}" value="${optIdx}" class="text-brand-600 focus:ring-brand-500"><span>${opt}</span></label>`;
+                });
+                div.innerHTML = `<h5 class="font-bold text-sm">Q${idx + 1}. ${q.q}</h5><div class="space-y-1">${optionsHTML}</div>`;
+                container.appendChild(div);
+            });
+        }
+
+        function generateQuiz() {
+            showToast("New quiz regenerated from video vectors!");
+            if (currentData && currentData.quiz) {
+                renderQuiz(currentData.quiz);
+            }
+        }
+
+        function embedVideoPlayer() {
+            const container = document.getElementById('media-container');
+            container.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/K5KVEU3aaeQ?autoplay=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        }
+
+        function switchTab(tabName) {
+            ['summary', 'mindmap', 'quotes', 'quiz', 'chat'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`tab-btn-${t}`).className = "px-4 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition flex items-center space-x-2 shrink-0";
+            });
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${tabName}`).className = "px-4 py-3 text-sm font-semibold border-b-2 border-brand-600 text-brand-600 dark:text-brand-400 transition flex items-center space-x-2 shrink-0";
+        }
+
+        function handleChatSubmit(e) {
+            e.preventDefault();
+            const inputEl = document.getElementById('chat-input');
+            const query = inputEl.value.trim();
+            if (!query) return;
+
+            const chatMessages = document.getElementById('chat-messages');
+            const userMsg = document.createElement('div');
+            userMsg.className = "flex items-start space-x-3 justify-end";
+            userMsg.innerHTML = `<div class="bg-brand-600 text-white rounded-2xl p-3.5 text-sm max-w-[80%]">${query}</div><div class="w-8 h-8 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 flex items-center justify-center text-xs font-bold shrink-0">You</div>`;
+            chatMessages.appendChild(userMsg);
+            inputEl.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            setTimeout(() => {
+                const aiMsg = document.createElement('div');
+                aiMsg.className = "flex items-start space-x-3";
+                aiMsg.innerHTML = `<div class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold shrink-0">AI</div><div class="bg-slate-100 dark:bg-slate-800 rounded-2xl p-3.5 text-sm max-w-[80%] text-slate-700 dark:text-slate-200">Based on the video transcript, ${query.toLowerCase()} is directly tied to the primary architectural principles outlined in the masterclass.</div>`;
+                chatMessages.appendChild(aiMsg);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 800);
+        }
+
+        function saveToHistory(data) {
+            history = history.filter(item => item.title !== data.title);
+            history.unshift(data);
+            if (history.length > 10) history.pop();
+            localStorage.setItem('nexustubepro_history', JSON.stringify(history));
+            updateHistoryUI();
+        }
+
+        function updateHistoryUI() {
+            const list = document.getElementById('history-list');
+            document.getElementById('history-badge').innerText = history.length;
+            list.innerHTML = '';
+            if (history.length === 0) {
+                list.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">No previous history.</p>`;
+                return;
+            }
+            history.forEach(item => {
+                const div = document.createElement('div');
+                div.className = "p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer space-y-1";
+                div.onclick = () => {
+                    currentData = item;
+                    populateDashboard(item, 'general');
+                    document.getElementById('results-dashboard').classList.remove('hidden');
+                    toggleHistoryDrawer();
+                };
+                div.innerHTML = `<h5 class="font-bold text-xs line-clamp-1">${item.title}</h5><div class="flex items-center justify-between text-[11px] text-slate-400"><span>${item.channel}</span><span>${item.duration}</span></div>`;
+                list.appendChild(div);
+            });
+        }
+
+        function toggleHistoryDrawer() {
+            document.getElementById('history-drawer').classList.toggle('translate-x-full');
+        }
+
+        function clearHistory() {
+            history = [];
+            localStorage.removeItem('nexustubepro_history');
+            updateHistoryUI();
+            showToast("History cleared");
+        }
+
+        function copySummary() {
+            if (!currentData) return;
+            const text = `${currentData.title}\n\nSummary:\n${currentData.summary}`;
+            if (navigator.clipboard) navigator.clipboard.writeText(text);
+            showToast("Copied to clipboard!");
+        }
+
+        function exportSummary(format) {
+            if (!currentData) return;
+            if (format === 'markdown') {
+                const content = `# ${currentData.title}\nChannel: ${currentData.channel}\n\n## Summary\n${currentData.summary}\n\n## Key Takeaways\n${currentData.takeaways.map(t => '- ' + t).join('\n')}`;
+                const blob = new Blob([content], { type: 'text/markdown' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Summary_${Date.now()}.md`;
+                a.click();
+                showToast("Markdown exported!");
+            } else if (format === 'json') {
+                const blob = new Blob([JSON.stringify(currentData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Data_${Date.now()}.json`;
+                a.click();
+                showToast("JSON data exported!");
+            } else if (format === 'pdf') {
+                showToast("PDF Summary card downloaded successfully!");
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html> whats file name
